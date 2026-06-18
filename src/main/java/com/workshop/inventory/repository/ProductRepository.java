@@ -21,8 +21,7 @@ public class ProductRepository {
             rs.getLong("id"),
             rs.getString("name"),
             rs.getDouble("price"),
-            rs.getInt("qty")
-    );
+            rs.getInt("qty"));
 
     public ProductRepository(NamedParameterJdbcTemplate jdbc) {
         this.jdbc = jdbc;
@@ -36,30 +35,27 @@ public class ProductRepository {
         List<Product> result = jdbc.query(
                 "SELECT * FROM products WHERE id = :id",
                 Map.of("id", id),
-                rowMapper
-        );
+                rowMapper);
         return result.stream().findFirst();
     }
 
     public Product create(String name, double price, int qty) {
         jdbc.update(
                 "INSERT INTO products (name, price, qty) VALUES (:name, :price, :qty)",
-                Map.of("name", name, "price", price, "qty", qty)
-        );
+                Map.of("name", name, "price", price, "qty", qty));
         Long id = jdbc.queryForObject("SELECT last_insert_rowid()", Map.of(), Long.class);
         return new Product(id, name, price, qty);
     }
 
     public Optional<Product> update(Long id, String name, Double price, Integer qty) {
         return findById(id).map(existing -> {
-            String updatedName  = name  != null ? name  : existing.getName();
+            String updatedName = name != null ? name : existing.getName();
             double updatedPrice = price != null ? price : existing.getPrice();
-            int    updatedQty   = qty   != null ? qty   : existing.getQty();
+            int updatedQty = qty != null ? qty : existing.getQty();
 
             jdbc.update(
                     "UPDATE products SET name = :name, price = :price, qty = :qty WHERE id = :id",
-                    Map.of("name", updatedName, "price", updatedPrice, "qty", updatedQty, "id", id)
-            );
+                    Map.of("name", updatedName, "price", updatedPrice, "qty", updatedQty, "id", id));
             return new Product(id, updatedName, updatedPrice, updatedQty);
         });
     }
@@ -76,8 +72,7 @@ public class ProductRepository {
             Integer current = jdbc.queryForObject(
                     "SELECT qty FROM products WHERE id = :id",
                     Map.of("id", item.getProductId()),
-                    Integer.class
-            );
+                    Integer.class);
             if (current == null) {
                 throw new IllegalArgumentException("Product not found: " + item.getProductId());
             }
@@ -89,8 +84,7 @@ public class ProductRepository {
         for (StockItem item : items) {
             jdbc.update(
                     "UPDATE products SET qty = qty - :qty WHERE id = :id",
-                    Map.of("qty", item.getQty(), "id", item.getProductId())
-            );
+                    Map.of("qty", item.getQty(), "id", item.getProductId()));
         }
     }
 }

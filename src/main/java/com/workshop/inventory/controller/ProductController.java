@@ -19,43 +19,44 @@ public class ProductController {
         this.repo = repo;
     }
 
-    @GetMapping("/api/products")
+    @GetMapping("/products")
     public List<Product> getAll() {
         return repo.findAll();
     }
 
-    @GetMapping("/api/products/{id}")
+    @GetMapping("/products/{id}")
     public ResponseEntity<Product> getById(@PathVariable Long id) {
         return repo.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/api/products")
+    @PostMapping("/products")
     public ResponseEntity<Product> create(@RequestBody Map<String, Object> body) {
-        String name  = (String) body.get("name");
+        String name = (String) body.get("name");
         double price = ((Number) body.get("price")).doubleValue();
-        int    qty   = ((Number) body.get("qty")).intValue();
+        int qty = ((Number) body.get("qty")).intValue();
         return ResponseEntity.status(201).body(repo.create(name, price, qty));
     }
 
-    @PutMapping("/api/products/{id}")
+    @PutMapping("/products/{id}")
     public ResponseEntity<Product> update(@PathVariable Long id, @RequestBody Map<String, Object> body) {
-        String name   = (String) body.get("name");
-        Double price  = body.get("price") != null ? ((Number) body.get("price")).doubleValue() : null;
-        Integer qty   = body.get("qty")   != null ? ((Number) body.get("qty")).intValue()      : null;
+        String name = (String) body.get("name");
+        Double price = body.get("price") != null ? ((Number) body.get("price")).doubleValue() : null;
+        Integer qty = body.get("qty") != null ? ((Number) body.get("qty")).intValue() : null;
         return repo.update(id, name, price, qty)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/api/products/{id}")
+    @DeleteMapping("/products/{id}")
     public ResponseEntity<Map<String, String>> delete(@PathVariable Long id) {
-        if (!repo.delete(id)) return ResponseEntity.notFound().build();
+        if (!repo.delete(id))
+            return ResponseEntity.notFound().build();
         return ResponseEntity.ok(Map.of("message", "Deleted"));
     }
 
-    @PostMapping("/api/reduce-stock")
+    @PostMapping("/reduce-stock")
     public ResponseEntity<Map<String, String>> reduceStock(@RequestBody StockReduceRequest request) {
         try {
             repo.reduceStock(request.getItems());
